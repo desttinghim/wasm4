@@ -228,6 +228,21 @@ pub fn build_cubeb(b: *std.Build, target: anytype, optimize: anytype) *std.Build
         "vendor/cubeb/src/cubeb_utils.cpp",
     }, &.{});
 
+    // TODO implement lazy load libs logic
+
+    const use_pulse = b.option(bool, "use-pulse", "Use pulse audio") orelse true;
+    cubeb.defineCMacro("USE_PULSE", if (use_pulse) "1" else "0");
+    if (use_pulse) {
+        cubeb.linkSystemLibrary("pulse");
+        cubeb.addCSourceFile("vendor/cubeb/src/cubeb_pulse.c", &.{});
+    }
+
+    const use_alsa = b.option(bool, "use-alsa", "Use alsa audio") orelse true;
+    cubeb.defineCMacro("USE_ALSA", if (use_alsa) "1" else "0");
+    if (use_alsa) {
+        cubeb.addCSourceFile("vendor/cubeb/src/cubeb_alsa.c", &.{});
+    }
+
     cubeb.installHeader("exports/cubeb_export.h", "cubeb_export.h");
     cubeb.installHeadersDirectory("vendor/cubeb/include/cubeb", "cubeb");
 
