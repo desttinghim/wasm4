@@ -4,7 +4,9 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const wasm3 = build_wasm3(b, target, optimize);
+    const wasm3_dep = b.dependency("wasm3", .{});
+
+    const wasm3 = wasm3_dep.artifact("wasm3");
     const minifb = build_minifb(b, target, optimize);
     const cubeb = build_cubeb(b, target, optimize);
 
@@ -45,67 +47,6 @@ pub fn build(b: *std.Build) void {
     run_step.dependOn(&run_cmd.step);
 }
 
-pub fn show_includes(compile_step: *std.Build.CompileStep, depth: usize) void {
-    for (0..depth) |_| {
-        std.debug.print("\t", .{});
-    }
-    std.debug.print("{s} include directories:\n", .{compile_step.name});
-    for (compile_step.include_dirs.items) |item| {
-        for (0..depth) |_| {
-            std.debug.print("\t", .{});
-        }
-        switch (item) {
-            .other_step => |step| {
-                show_includes(step, depth + 1);
-            },
-            .config_header_step => |step| {
-                std.debug.print("\tConfig Header: {s}\n", .{step.include_path});
-            },
-            inline else => |dir_str| {
-                std.debug.print("\t{s}\n", .{dir_str});
-            },
-        }
-    }
-}
-
-pub fn build_wasm3(b: *std.Build, target: anytype, optimize: anytype) *std.Build.CompileStep {
-    const wasm3 = b.addStaticLibrary(.{
-        .name = "wasm3",
-        .target = target,
-        .optimize = optimize,
-    });
-    wasm3.linkLibC();
-    wasm3.addCSourceFiles(&.{
-        "vendor/wasm3/source/m3_api_libc.c",
-        "vendor/wasm3/source/m3_api_meta_wasi.c",
-        "vendor/wasm3/source/m3_api_tracer.c",
-        "vendor/wasm3/source/m3_api_uvwasi.c",
-        "vendor/wasm3/source/m3_api_wasi.c",
-        "vendor/wasm3/source/m3_bind.c",
-        "vendor/wasm3/source/m3_code.c",
-        "vendor/wasm3/source/m3_compile.c",
-        "vendor/wasm3/source/m3_core.c",
-        "vendor/wasm3/source/m3_env.c",
-        "vendor/wasm3/source/m3_exec.c",
-        "vendor/wasm3/source/m3_function.c",
-        "vendor/wasm3/source/m3_info.c",
-        "vendor/wasm3/source/m3_module.c",
-        "vendor/wasm3/source/m3_parse.c",
-    }, &.{});
-
-    wasm3.disable_sanitize_c = true;
-
-    wasm3.installHeader("vendor/wasm3/source/m3_bind.h", "m3_bind.h");
-    wasm3.installHeader("vendor/wasm3/source/m3_code.h", "m3_code.h");
-    wasm3.installHeader("vendor/wasm3/source/m3_compile.h", "m3_compile.h");
-    wasm3.installHeader("vendor/wasm3/source/m3_core.h", "m3_core.h");
-    wasm3.installHeader("vendor/wasm3/source/m3_env.h", "m3_env.h");
-    wasm3.installHeader("vendor/wasm3/source/m3_exec.h", "m3_exec.h");
-    wasm3.installHeader("vendor/wasm3/source/m3_function.h", "m3_function.h");
-    wasm3.installHeader("vendor/wasm3/source/m3_info.h", "m3_info.h");
-    return wasm3;
-}
-
 pub fn build_minifb(b: *std.Build, target: anytype, optimize: anytype) *std.Build.CompileStep {
     const minifb = b.addStaticLibrary(.{
         .name = "minifb",
@@ -126,9 +67,9 @@ pub fn build_minifb(b: *std.Build, target: anytype, optimize: anytype) *std.Buil
     minifb.installHeader("vendor/minifb/include/MiniFB.h", "MiniFB.h");
     minifb.installHeader("vendor/minifb/include/MiniFB_enums.h", "MiniFB_enums.h");
 
-    const use_gl = b.option(bool, "use-gl", "Use OpenGL for minifb");
+    const use_gl = b.option(bool, "use-gl", "Use OpenGL for minifb") orelse false;
 
-    if (use_gl orelse false) {
+    if (use_gl) {
         minifb.addCSourceFiles(&.{
             "vendor/minifb/src/gl/MiniFB_GL.c",
         }, &.{});
