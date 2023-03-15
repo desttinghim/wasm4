@@ -26,7 +26,10 @@ pub fn build(b: *std.Build) void {
     exe.linkLibrary(wasm3);
     exe.linkLibrary(minifb);
     exe.linkLibrary(cubeb);
-    exe.addIncludePath("vendor/wasm3/source");
+    exe.installLibraryHeaders(wasm3);
+    exe.installLibraryHeaders(minifb);
+    exe.installLibraryHeaders(cubeb);
+    exe.addIncludePath(b.getInstallPath(.{ .custom = "exports" }, ""));
     exe.addCSourceFiles(&.{
         "src/backend/main.c",
         "src/backend/wasm_wasm3.c",
@@ -144,16 +147,29 @@ pub fn build_cubeb(b: *std.Build, target: anytype, optimize: anytype) *std.Build
         "vendor/cubeb/subprojects/speex/resample.c",
     }, &.{});
 
+    const export_header = b.addConfigHeader(.{
+        .style = .blank,
+        .max_bytes = 4096,
+        .include_path = "cubeb_export.h",
+    }, .{
+        .CUBEB_EXPORT = {},
+        .CUBEB_NO_EXPORT = {},
+        .CUBEB_DEPRECATED = "__attribute__ ((__deprecated__))",
+    });
+    b.getInstallStep().dependOn(&export_header.step);
+
     const cubeb = b.addStaticLibrary(.{
         .name = "cubeb",
         .target = target,
         .optimize = optimize,
     });
+    cubeb.step.dependOn(&export_header.step);
+    cubeb.addConfigHeader(export_header);
+    cubeb.installConfigHeader(export_header, .{ .install_dir = .{ .custom = "exports" } });
     cubeb.linkLibC();
     cubeb.linkLibCpp();
     cubeb.disable_sanitize_c = true;
     cubeb.linkLibrary(speex);
-    cubeb.addIncludePath("exports");
     cubeb.addIncludePath("vendor/cubeb/include");
     cubeb.addIncludePath("vendor/cubeb/subprojects");
     cubeb.defineCMacro("OUTSIDE_SPEEX", "");
@@ -184,7 +200,6 @@ pub fn build_cubeb(b: *std.Build, target: anytype, optimize: anytype) *std.Build
         cubeb.addCSourceFile("vendor/cubeb/src/cubeb_alsa.c", &.{});
     }
 
-    cubeb.installHeader("exports/cubeb_export.h", "cubeb_export.h");
     cubeb.installHeadersDirectory("vendor/cubeb/include/cubeb", "cubeb");
 
     return cubeb;
