@@ -6,5 +6,13 @@
             .url = "https://github.com/desttinghim/wasm3/archive/ae60df564f33c4859f03cf6b8f413faa5e423c6b.tar.gz",
             .hash = "1220d8751b15224c8c1a8b828b14ddf721a0d122dbb0c27aa4c7dee7c99d91c675a2",
         },
+        .minifb = .{
+            .url = "https://github.com/desttinghim/minifb/archive/dc4591673d864479626133214c89c549e014ad95.tar.gz",
+            .hash = "1220a10a9bca760955f2976d1633c1aa73cbdab75e5db9ab846652cd43933e811693",
+        },
+        .cubeb = .{
+            .url = "https://github.com/desttinghim/cubeb/archive/483841cfe83e3c1eeca2da1a5f04706fbdee0a35.tar.gz",
+            .hash = "1220b843da9c310f87a29ba6ebf0ed5cd0d383e49380c54336a7631a16d6c15e6520",
+        },
     },
 }
