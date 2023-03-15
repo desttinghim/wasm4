@@ -92,6 +92,9 @@ pub fn build_wasm3(b: *std.Build, target: anytype, optimize: anytype) *std.Build
         "vendor/wasm3/source/m3_module.c",
         "vendor/wasm3/source/m3_parse.c",
     }, &.{});
+
+    wasm3.disable_sanitize_c = true;
+
     wasm3.installHeader("vendor/wasm3/source/m3_bind.h", "m3_bind.h");
     wasm3.installHeader("vendor/wasm3/source/m3_code.h", "m3_code.h");
     wasm3.installHeader("vendor/wasm3/source/m3_compile.h", "m3_compile.h");
