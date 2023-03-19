@@ -7,8 +7,8 @@
             .hash = "1220d8751b15224c8c1a8b828b14ddf721a0d122dbb0c27aa4c7dee7c99d91c675a2",
         },
         .minifb = .{
-            .url = "https://github.com/desttinghim/minifb/archive/dc4591673d864479626133214c89c549e014ad95.tar.gz",
-            .hash = "1220a10a9bca760955f2976d1633c1aa73cbdab75e5db9ab846652cd43933e811693",
+            .url = "https://github.com/desttinghim/minifb/archive/6a11aeb9010b52cc8083978ecdd91ddc2e9cdd38.tar.gz",
+            .hash = "1220018e39b3976fbd2d1649a52cfc9bb17e36088d5a504de42f1c2a135446babdd7",
         },
         .cubeb = .{
             .url = "https://github.com/desttinghim/cubeb/archive/483841cfe83e3c1eeca2da1a5f04706fbdee0a35.tar.gz",

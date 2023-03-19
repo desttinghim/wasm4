@@ -5,7 +5,9 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const wasm3_dep = b.dependency("wasm3", .{});
-    const minifb_dep = b.dependency("minifb", .{});
+    const minifb_dep = b.dependency("minifb", .{
+        .USE_WAYLAND_API = false, // TODO: figure out why wayland window is not showing
+    });
     const cubeb_dep = b.dependency("cubeb", .{});
 
     const wasm3 = wasm3_dep.artifact("wasm3");
